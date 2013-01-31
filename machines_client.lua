@@ -189,8 +189,8 @@ parallel.waitForAny(function() wait_rednet() end, function() getInput(msg.is_sec
 rednet.send(server_id, textutils.serialize({action = "ans", user_text = user_input}));
 
 is_init = false;
-term.clear()
-term.setCursorPos(1, 1)
+--term.clear()
+--term.setCursorPos(1, 1)
 print("Пожалуйста, подождите.")
 timer = os.startTimer(1)
 end --read
