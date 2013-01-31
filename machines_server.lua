@@ -135,7 +135,7 @@ pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = tr
 
 if pin == -1 then return -1 end
 
-pin2 = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, posx = 1, posy = 1, is_secure = true, text = "Введите пароль еще раз для подтверждения:"}, 60)
+pin2 = SendAndWaitForMessage({action = "read", term_clear = false, set_cursor = false, is_secure = true, text = "Введите пароль еще раз для подтверждения:"}, 60)
 
 if pin2 == -1 then return -1 end
 
