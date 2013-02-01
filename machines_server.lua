@@ -130,7 +130,7 @@ while is_na do
 
 is_na = false
 
-pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = true, posx = 1, posy = 1, text = "Пожалуйста, придумайте и введите пароль для оформления заказа:"}, 30)
+pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = true, posx = 1, posy = 1, text = "Пожалуйста, придумайте и введите пароль для оформления заказа в английской раскладке не менее 4 символов:"}, 30)
 
 if pin == -1 then return -1 end
 
@@ -264,7 +264,7 @@ if sel == 2 then
 os.reboot()
 end
 
-login = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите ваш игровой логин.\nВ случае возникновения технических трудностей, либо других проблем, ваш игровой логин поможет вам вернуть ваши вещи:"}, 30)
+login = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите ваш игровой логин в английской раскладке.\nВ случае возникновения технических трудностей, либо других проблем, ваш игровой логин поможет вам вернуть ваши вещи:"}, 30)
 
 if login == -1 then
 os.reboot()
@@ -277,8 +277,8 @@ os.reboot()
 end
 
 if sel == 1 then --если зарядка, запрашиваем время
-while (charge_time < 1 or charge_time > 5) and charge_time ~= -1 do
-charge_time = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите время в минутах, в течение которого будет заряжаться ваши вещи (от 1 до 5 минут):"}, 30)
+while (charge_time < 1 or charge_time > 2) and charge_time ~= -1 do
+charge_time = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите время в минутах, в течение которого будет заряжаться каждый предмет (от 1 до 2 минут):"}, 30)
 
 if tonumber(charge_time) == nil then charge_time = 0 end
 
@@ -309,12 +309,18 @@ glog[#glog]["line"] = sel
 local file = fs.open("machines_start","w")
 file.close()
 
+if not colors.test(rs.getBundledInput("back"), colors.black) then
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, сядьте в вагонетку и не покидайте ее пока не загрузите все предметы."})
+end
+
+while not colors.test(rs.getBundledInput("back"), colors.black) do
+WaitForMessages()
+end  
+
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, бросьте предметы в окно загрузки, в сторону зеленого света, после чего покиньте вагонетку."})
 
 if colors.test(rs.getBundledInput("back"), colors.black) then
 rs.setBundledOutput("back", colors.combine(colors.white, colors.cyan))
-else
-os.reboot()
 end  
 
 glog[#glog]["status"] = 1
