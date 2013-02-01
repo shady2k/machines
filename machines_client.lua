@@ -6,7 +6,7 @@ local selection = "";
 local sIndex = 1;
 local offset = 1;
 local tx = 1;
-local controls_text="Управление: PageUp/PageDown";
+local controls_text="Управл.: стрелка вверх/вниз, Enter";
 while (selection == "") do
   term.clear();
   local xMax, yMax = term.getSize();
@@ -18,13 +18,13 @@ while (selection == "") do
  
 term.setCursorPos(1,1);
 term.write(path);
-term.setCursorPos(xMax - 22, 1);
-term.write("|Приборы и зарядник shady2k");
+term.setCursorPos(xMax - 24, 1);
+term.write("|Зарядник shady2k");
  
 term.setCursorPos(tx,yMax+4);
 term.write("Страница "..offset.." из "..max_offset.." | ");
  
-term.setCursorPos(xMax - string.len(controls_text) + 9, yMax+4);
+term.setCursorPos(xMax - string.len(controls_text) + 23, yMax+4);
 term.write(controls_text);
  
         for tx=1, xMax do
@@ -189,8 +189,8 @@ parallel.waitForAny(function() wait_rednet() end, function() getInput(msg.is_sec
 rednet.send(server_id, textutils.serialize({action = "ans", user_text = user_input}));
 
 is_init = false;
---term.clear()
---term.setCursorPos(1, 1)
+term.clear()
+term.setCursorPos(1, 1)
 print("Пожалуйста, подождите.")
 timer = os.startTimer(1)
 end --read
