@@ -441,6 +441,18 @@ redstone.setBundledOutput("back", 0) --останавливаем линии
 
 glog[#glog]["status"] = 5
 
+if InCounter == 0 and OutCounter == 0 then
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Выдавать нечего, завершиние работы."})
+
+glog[#glog]["is_done"] = 1
+glog[#glog]["status"] = 55
+if glog ~= nil then save(glog, "machines_log") end
+fs.delete("machines_start")
+
+sleep(1)
+os.reboot()
+end	
+
 validate_pin(pin); --запрашиваем и проверяем пароль
 
 glog[#glog]["status"] = 6
