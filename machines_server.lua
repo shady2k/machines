@@ -437,7 +437,7 @@ end
 glog[#glog]["status"] = 4
 
 redstone.setBundledOutput("back",  colors.gray) --останавливаем линии, включаем возврат некондиции
-SleepAndWaitForMessages(15)
+SleepAndWaitForMessages(5)
 
 glog[#glog]["status"] = 45
 
