@@ -160,7 +160,10 @@ msg = textutils.unserialize(data)
 if msg.action == "print" then -- print
 
 if msg.term_clear then term.clear() end
-if msg.set_cursor then term.setCursorPos(tonumber(msg.posx), tonumber(msg.posy)) end
+if msg.set_cursor then 
+term.setCursorPos(tonumber(msg.posx), tonumber(msg.posy)) 
+term.clearLine()
+end
 print(msg.text)
 
 end --print
@@ -181,7 +184,10 @@ end --VertMenu
 if msg.action == "read" then --read
 
 if msg.term_clear then term.clear() end
-if msg.set_cursor then term.setCursorPos(tonumber(msg.posx), tonumber(msg.posy)) end
+if msg.set_cursor then 
+term.setCursorPos(tonumber(msg.posx), tonumber(msg.posy)) 
+term.clearLine()
+end
 print(msg.text)
 
 parallel.waitForAny(function() wait_rednet() end, function() getInput(msg.is_secure) end)
