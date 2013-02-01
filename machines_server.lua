@@ -31,7 +31,7 @@ rednet.send(client_id, msg)
 print("Send message: "..msg.."\n")
 if glog ~= nil then save(glog, "machines_log") end
 
-if timeout ~= 0 then local timer = os.startTimer(1) end
+local timer = os.startTimer(1) 
 
 while 1 do
 
@@ -40,9 +40,8 @@ local event, param, data = os.pullEvent()
 if event == "timer" and param == timer then
 timeout = timeout - 1
 
-if timeout <= 0 then
-return -1
-end
+if timeout <= -1 then timeout = -1 end
+if timeout == 0 then return -1 end
 
 timer = os.startTimer(1)
 end
@@ -131,11 +130,11 @@ while is_na do
 
 is_na = false
 
-pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = true, posx = 1, posy = 1, text = "Пожалуйста, придумайте и введите пароль для оформления заказа:"}, 60)
+pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = true, posx = 1, posy = 1, text = "Пожалуйста, придумайте и введите пароль для оформления заказа:"}, 30)
 
 if pin == -1 then return -1 end
 
-pin2 = SendAndWaitForMessage({action = "read", term_clear = false, set_cursor = false, is_secure = true, text = "Введите пароль еще раз для подтверждения:"}, 60)
+pin2 = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, posx = 1, posy = 1, is_secure = true, text = "Введите пароль еще раз для подтверждения:"}, 30)
 
 if pin2 == -1 then return -1 end
 
@@ -179,7 +178,7 @@ while is_na do
 
 is_na = false;
 
-pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = true, posx = 1, posy = 1, text = "Пожалуйста, для выдачи предметов введите ваш пароль:"}, 0)
+pin = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = true, posx = 1, posy = 1, text = "Пожалуйста, для выдачи предметов введите ваш пароль:"}, -1)
 
 if pin ~= pin2 then
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Неверный пароль."})
@@ -255,30 +254,38 @@ end
 
 redstone.setBundledOutput("back", colors.cyan)
 
-sel = SendAndWaitForMessage({action = "VertMenu", menu_table = {"1. Зарядка", "Выход"}, menu_path = "Главное меню"}, 60)
+sel = SendAndWaitForMessage({action = "VertMenu", menu_table = {"1. Зарядка", "Выход"}, menu_path = "Главное меню"}, 30)
 
-if sel == -1 then return end
+if sel == -1 then
+os.reboot()
+end
 
 if sel == 2 then
 os.reboot()
 end
 
-login = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите ваш игровой логин.\nВ случае возникновения технических трудностей, либо других проблем, ваш игровой логин поможет вам вернуть ваши вещи:"}, 60)
+login = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите ваш игровой логин.\nВ случае возникновения технических трудностей, либо других проблем, ваш игровой логин поможет вам вернуть ваши вещи:"}, 30)
 
-if login == -1 then return end
+if login == -1 then
+os.reboot()
+end
 
 pin = type_pin();
 
-if pin == -1 then return end
+if pin == -1 then
+os.reboot()
+end
 
 if sel == 1 then --если зарядка, запрашиваем время
 while (charge_time < 1 or charge_time > 5) and charge_time ~= -1 do
-charge_time = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите время в минутах, в течение которого будет заряжаться ваши вещи (от 1 до 5 минут):"}, 60)
+charge_time = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите время в минутах, в течение которого будет заряжаться ваши вещи (от 1 до 5 минут):"}, 30)
 
 if tonumber(charge_time) == nil then charge_time = 0 end
 
 charge_time = tonumber(charge_time)
-if charge_time == -1 then return end
+if charge_time == -1 then
+os.reboot()
+end
 end
 glog[#glog]["charge_time"] = charge_time
 charge_time = charge_time * 60
