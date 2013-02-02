@@ -200,7 +200,7 @@ end
 -- colors.white 	1 	0x1 	0000000000000001
 -- colors.orange 	2 	0x2 	0000000000000010
 	-- colors.magenta 	4 	0x4 	0000000000000100
-	-- colors.lightBlue 	8 	0x8 	0000000000001000
+-- colors.lightBlue 	8 	0x8 	0000000000001000
 -- colors.yellow 	16 	0x10 	0000000000010000
 -- colors.lime 	32 	0x20 	0000000000100000
 	-- colors.pink 	64 	0x40 	0000000001000000
@@ -254,13 +254,9 @@ end
 
 redstone.setBundledOutput("back", colors.cyan)
 
-sel = SendAndWaitForMessage({action = "VertMenu", menu_table = {"1. Зарядка", "Выход"}, menu_path = "Главное меню"}, 30)
+sel = SendAndWaitForMessage({action = "VertMenu", menu_table = {"1. Зарядка", "2. Дробилка + печь", "Выход"}, menu_path = "Главное меню"}, 30)
 
-if sel == -1 then
-os.reboot()
-end
-
-if sel == 2 then
+if sel == -1 or sel == 3 then
 os.reboot()
 end
 
@@ -338,7 +334,8 @@ SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, p
 if sel == 1 then 
 rs.setBundledOutput("back", colors.green)
 elseif sel == 2 then
-redstone.setBundledOutput("back", colors.yellow)
+redstone.setBundledOutput("back", colors.lightBlue)
+redstone.setBundledOutput("right", colors.white)
 elseif sel == 3 then
 redstone.setBundledOutput("back", colors.pink)
 elseif sel == 4 then
@@ -384,13 +381,12 @@ SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, 
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = OutCounter})
 
 local op_timer_str = ""
-if op_timer < 10 then 
-op_timer_str = "0"..tostring(op_timer)
-else
 op_timer_str = tostring(op_timer)
+
+if sel == 1 then
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = op_timer_str})
 end
 
-SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = op_timer_str})
 end
 
 if InCounter <= OutCounter then
@@ -444,6 +440,7 @@ glog[#glog]["status"] = 45
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Обработка завершена."})
 
 redstone.setBundledOutput("back", 0) --останавливаем линии
+redstone.setBundledOutput("right", 0) --останавливаем линии
 
 glog[#glog]["status"] = 5
 
@@ -459,8 +456,6 @@ sleep(1)
 os.reboot()
 end	
 
-validate_pin(pin); --запрашиваем и проверяем пароль
-
 glog[#glog]["status"] = 6
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Для начала выдачи, сядьте, пожалуйста, в вагонетку."})
@@ -468,6 +463,10 @@ SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, p
 while not colors.test(rs.getBundledInput("back"), colors.black) do
 WaitForMessages()
 end
+
+rs.setBundledOutput("back", colors.cyan)
+
+validate_pin(pin); --запрашиваем и проверяем пароль
 
 glog[#glog]["status"] = 7
 
