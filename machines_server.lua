@@ -273,8 +273,8 @@ os.reboot()
 end
 
 if sel == 1 then --если зарядка, запрашиваем время
-while (charge_time < 1 or charge_time > 2) and charge_time ~= -1 do
-charge_time = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите время в минутах, в течение которого будет заряжаться каждый предмет (от 1 до 2 минут):"}, 30)
+while (charge_time < 30 or charge_time > 120) and charge_time ~= -1 do
+charge_time = SendAndWaitForMessage({action = "read", term_clear = true, set_cursor = true, is_secure = false, posx = 1, posy = 1, text = "Пожалуйста, введите время в секундах, в течение которого будет заряжаться каждый предмет (от 30 до 120 секунд):"}, 30)
 
 if tonumber(charge_time) == nil then charge_time = 0 end
 
@@ -284,7 +284,6 @@ os.reboot()
 end
 end
 glog[#glog]["charge_time"] = charge_time
-charge_time = charge_time * 60
 end --если зарядка, запрашиваем время
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите."})
@@ -469,6 +468,12 @@ rs.setBundledOutput("back", colors.cyan)
 validate_pin(pin); --запрашиваем и проверяем пароль
 
 glog[#glog]["status"] = 7
+
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Для начала выдачи, сядьте, пожалуйста, в вагонетку. И не покидайте ее, пока не получили свои предметы."})
+
+while not colors.test(rs.getBundledInput("back"), colors.black) do
+WaitForMessages()
+end
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "После того, как вы получили все свои предметы, пожалуйста, покиньте вагонетку.\n\nНачинаю выдачу."})
 
