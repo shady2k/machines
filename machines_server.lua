@@ -359,7 +359,7 @@ local is_eject = false
 
 if sel == 1 then 
 op_timer = charge_time
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд)\n"..tostring(op_timer)})
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(op_timer)})
 else
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0"})
 end
