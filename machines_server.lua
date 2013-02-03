@@ -205,7 +205,7 @@ end
 -- colors.lime 	32 	0x20 	0000000000100000
 	-- colors.pink 	64 	0x40 	0000000001000000
 -- colors.gray 	128 	0x80 	0000000010000000
-	-- colors.lightGray 	256 	0x100 	0000000100000000
+-- colors.lightGray 	256 	0x100 	0000000100000000
 -- colors.cyan 	512 	0x200 	0000001000000000
 -- colors.purple 	1024 	0x400 	0000010000000000
 -- colors.blue 	2048 	0x800 	0000100000000000
@@ -220,6 +220,7 @@ local last_msg
 local charge_time = 0
 client_id = 6484
 InCounter = 0
+AddCounter = 0
 OutCounter = 0
 
 --os.pullEvent = os.pullEventRaw;
@@ -248,7 +249,7 @@ redstone.setBundledOutput("back", colors.purple)
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Добро пожаловать!\n\nДля начала работы сядьте, пожалуйста, в вагонетку."})
 
-while not colors.test(rs.getBundledInput("back"), colors.black) do
+while not rs.testBundledInput("back", colors.black) do
 WaitForMessages()
 end
 
@@ -304,23 +305,23 @@ glog[#glog]["line"] = sel
 local file = fs.open("machines_start","w")
 file.close()
 
-if not colors.test(rs.getBundledInput("back"), colors.black) then
+if not rs.testBundledInput("back", colors.black) then
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, сядьте в вагонетку и не покидайте ее пока не загрузите все предметы."})
 end
 
-while not colors.test(rs.getBundledInput("back"), colors.black) do
+while not rs.testBundledInput("back", colors.black) do
 WaitForMessages()
 end  
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, бросьте предметы в окно загрузки, в сторону зеленого света, после чего покиньте вагонетку."})
 
-if colors.test(rs.getBundledInput("back"), colors.black) then
+if rs.testBundledInput("back", colors.black) then
 rs.setBundledOutput("back", colors.combine(colors.white, colors.cyan))
 end  
 
 glog[#glog]["status"] = 1
 
-while colors.test(rs.getBundledInput("back"), colors.black) do
+while rs.testBundledInput("back", colors.black) do
 WaitForMessages()
 end
 
@@ -361,7 +362,7 @@ if sel == 1 then
 op_timer = charge_time
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(op_timer)})
 else
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0"})
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nДобавлено:\n0\nОбработано:\n0"})
 end
 
 while not is_stop do
@@ -375,9 +376,10 @@ is_eject = false
 rs.setBundledOutput("back", colors.green)
 end
 
-if InCounter > OutCounter then
+if (InCounter + AddCounter) > OutCounter then
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
-SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = OutCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = AddCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = OutCounter})
 
 local op_timer_str = ""
 op_timer_str = tostring(op_timer)
@@ -388,8 +390,8 @@ end
 
 end
 
-if InCounter <= OutCounter then
-if not is_show and InCounter ~=0 and OutCounter ~= 0 then
+if (InCounter + AddCounter) <= OutCounter then
+if not is_show and InCounter ~=0 and AddCounter ~= 0 and OutCounter ~= 0 then
 is_show=true;
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите. Подготовка к выдаче."})
 end
@@ -415,17 +417,27 @@ end --таймер задержки в приборе
 timer = os.startTimer(1)
 end
 
-    if sEvent == "redstone" and colors.test(rs.getBundledInput("back"), colors.red) then
+	if sEvent == "redstone" then
+
+    if rs.testBundledInput("back", colors.red) then
     InCounter = InCounter + 1;
 	finish_counter = 0;
 	glog[#glog]["InCounter"] = InCounter
     end
+	
+    if rs.testBundledInput("back", colors.lightGray) then
+    AddCounter = AddCounter + 1;
+	finish_counter = 0;
+	glog[#glog]["AddCounter"] = AddCounter
+    end	
 
-    if sEvent == "redstone" and colors.test(rs.getBundledInput("back"), colors.blue) then
+    if rs.testBundledInput("back", colors.blue) then
     OutCounter = OutCounter + 1;
 	finish_counter = 0;
 	glog[#glog]["OutCounter"] = OutCounter
     end	
+	
+	end
 
 end
 
@@ -443,7 +455,7 @@ redstone.setBundledOutput("right", 0) --останавливаем линии
 
 glog[#glog]["status"] = 5
 
-if InCounter == 0 and OutCounter == 0 then
+if InCounter == 0 and AddCounter == 0 and OutCounter == 0 then
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Выдавать нечего, завершиние работы."})
 
 glog[#glog]["is_done"] = 1
@@ -459,7 +471,7 @@ glog[#glog]["status"] = 6
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Для начала выдачи, сядьте, пожалуйста, в вагонетку."})
 
-while not colors.test(rs.getBundledInput("back"), colors.black) do
+while not rs.testBundledInput("back", colors.black) do
 WaitForMessages()
 end
 
@@ -471,7 +483,7 @@ glog[#glog]["status"] = 7
 
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Для начала выдачи, сядьте, пожалуйста, в вагонетку. И не покидайте ее, пока не получили свои предметы."})
 
-while not colors.test(rs.getBundledInput("back"), colors.black) do
+while not rs.testBundledInput("back", colors.black) do
 WaitForMessages()
 end
 
@@ -481,7 +493,7 @@ rs.setBundledOutput("back", colors.combine(colors.orange, colors.cyan))
 
 glog[#glog]["status"] = 8
 
-while colors.test(rs.getBundledInput("back"), colors.black) do --проверка нажимной плиты перед окном загрузки
+while rs.testBundledInput("back", colors.black) do --проверка нажимной плиты перед окном загрузки
 WaitForMessages()
 end
 
