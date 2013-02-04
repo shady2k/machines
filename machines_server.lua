@@ -214,14 +214,14 @@ end
 -- colors.red 	16384 	0x4000 	0100000000000000
 -- colors.black 	32768 	0x8000 	1000000000000000 
 
+client_id = 6484
 local sel
 local pin
 local last_msg
 local charge_time = 0
-client_id = 6484
-InCounter = 0
-AddCounter = 0
-OutCounter = 0
+local InCounter = 0
+local AddCounter = 0
+local OutCounter = 0
 
 --os.pullEvent = os.pullEventRaw;
 rednet.open("left")
@@ -359,8 +359,8 @@ local op_timer = 0
 local is_eject = false
 
 if sel == 1 then 
-op_timer = charge_time
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(op_timer)})
+op_timer = 15
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
 else
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nДобавлено:\n0\nОбработано:\n0"})
 end
@@ -369,7 +369,31 @@ while not is_stop do
 
 local sEvent, param1 = os.pullEvent()
 
+if sEvent == "redstone" then
+
+    if rs.testBundledInput("back", colors.red) then
+    InCounter = InCounter + 1;
+	finish_counter = 0;
+    end
+	
+    if rs.testBundledInput("back", colors.lightGray) then
+    AddCounter = AddCounter + 1;
+	finish_counter = 0;
+    end	
+
+    if rs.testBundledInput("back", colors.blue) then
+    OutCounter = OutCounter + 1;
+	finish_counter = 0;
+    end	
+
+
+end
+
 if sEvent == "timer" and param1 == timer then
+
+glog[#glog]["InCounter"] = InCounter
+glog[#glog]["AddCounter"] = AddCounter
+glog[#glog]["OutCounter"] = OutCounter
 
 if is_eject then
 is_eject = false
@@ -377,21 +401,21 @@ rs.setBundledOutput("back", colors.green)
 end
 
 if (InCounter + AddCounter) > OutCounter then
+
+if sel == 1 then
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = OutCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = tostring(op_timer)})
+else
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = AddCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = OutCounter})
-
-local op_timer_str = ""
-op_timer_str = tostring(op_timer)
-
-if sel == 1 then
-SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = op_timer_str})
 end
 
 end
 
 if (InCounter + AddCounter) <= OutCounter then
-if not is_show and InCounter ~=0 and AddCounter ~= 0 and OutCounter ~= 0 then
+if not is_show and InCounter ~=0 and OutCounter ~= 0 then
 is_show=true;
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите. Подготовка к выдаче."})
 end
@@ -417,28 +441,6 @@ end --таймер задержки в приборе
 timer = os.startTimer(1)
 end
 
-	if sEvent == "redstone" then
-
-    if rs.testBundledInput("back", colors.red) then
-    InCounter = InCounter + 1;
-	finish_counter = 0;
-	glog[#glog]["InCounter"] = InCounter
-    end
-	
-    if rs.testBundledInput("back", colors.lightGray) then
-    AddCounter = AddCounter + 1;
-	finish_counter = 0;
-	glog[#glog]["AddCounter"] = AddCounter
-    end	
-
-    if rs.testBundledInput("back", colors.blue) then
-    OutCounter = OutCounter + 1;
-	finish_counter = 0;
-	glog[#glog]["OutCounter"] = OutCounter
-    end	
-	
-	end
-
 end
 
 glog[#glog]["status"] = 4
@@ -455,7 +457,7 @@ redstone.setBundledOutput("right", 0) --останавливаем линии
 
 glog[#glog]["status"] = 5
 
-if InCounter == 0 and AddCounter == 0 and OutCounter == 0 then
+if InCounter == 0 and OutCounter == 0 then
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Выдавать нечего, завершиние работы."})
 
 glog[#glog]["is_done"] = 1
