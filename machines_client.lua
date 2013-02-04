@@ -122,6 +122,7 @@ server_id = 6478
 local idle_count = 0
 local timer = os.startTimer(1)
 local is_init = false
+local parallel_count = 0
 user_input = ""
 
 os.pullEvent = os.pullEventRaw
@@ -182,6 +183,9 @@ timer = os.startTimer(1)
 end --VertMenu
 
 if msg.action == "read" then --read
+
+parallel_count = parallel_count + 1
+if parallel_count > 40 then os.reboot() end
 
 if msg.term_clear then term.clear() end
 if msg.set_cursor then 
