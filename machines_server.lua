@@ -357,9 +357,9 @@ local timer = os.startTimer(1);
 local is_show = false;
 local op_timer = 0
 local is_eject = false
-local InCounter_id = 10
-local AddCounter_id = 11
-local OutCounter_id = 12
+local InCounter_id = 6577
+local AddCounter_id = 6576
+local OutCounter_id = 6575
 
 if sel == 1 then 
 op_timer = 15
