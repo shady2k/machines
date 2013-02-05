@@ -400,6 +400,7 @@ if sEvent == "timer" and param == timer then
 
 glog[#glog]["InCounter"] = InCounter
 glog[#glog]["AddCounter"] = AddCounter
+glog[#glog]["UnprocessedCounter"] = UnprocessedCounter
 glog[#glog]["OutCounter"] = OutCounter
 
 if is_eject then
