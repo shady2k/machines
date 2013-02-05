@@ -1,4 +1,4 @@
--- Program: Machines server 0.1
+-- Program: Machines server 0.2
 -- Author: shady2k
 
 function save(table,name)
