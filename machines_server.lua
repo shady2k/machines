@@ -221,7 +221,11 @@ local last_msg
 local charge_time = 0
 local InCounter = 0
 local AddCounter = 0
+local UnprocessedCounter = 0
 local OutCounter = 0
+local InCounter_id = 6577
+local AddCounter_id = 6576
+local OutCounter_id = 6575
 
 --os.pullEvent = os.pullEventRaw;
 rednet.open("left")
@@ -357,15 +361,12 @@ local timer = os.startTimer(1);
 local is_show = false;
 local op_timer = 0
 local is_eject = false
-local InCounter_id = 6577
-local AddCounter_id = 6576
-local OutCounter_id = 6575
 
 if sel == 1 then 
 op_timer = 15
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
 else
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nДобавлено:\n0\nОбработано:\n0"})
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nПринято к обработке:\n0\nОтброшено:\n0\nОбработано:\n0"})
 end
 
 while not is_stop do
@@ -379,17 +380,18 @@ msg = textutils.unserialize(data)
 
 if param == InCounter_id then
 InCounter = InCounter + msg.count
-finish_counter = 0;
+finish_counter = 0
 end
 
 if param == AddCounter_id then
 AddCounter = AddCounter + msg.count
-finish_counter = 0;
+UnprocessedCounter = UnprocessedCounter + msg.unprocessed_count
+finish_counter = 0
 end
 
 if param == OutCounter_id then
 OutCounter = OutCounter + msg.count
-finish_counter = 0;
+finish_counter = 0
 end
 
 end
@@ -414,7 +416,8 @@ SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, 
 else
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = AddCounter})
-SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = OutCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = UnprocessedCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 8, text = OutCounter})
 end
 
 end
