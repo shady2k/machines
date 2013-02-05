@@ -205,13 +205,13 @@ end
 -- colors.lime 	32 	0x20 	0000000000100000
 	-- colors.pink 	64 	0x40 	0000000001000000
 -- colors.gray 	128 	0x80 	0000000010000000
--- colors.lightGray 	256 	0x100 	0000000100000000
+	-- colors.lightGray 	256 	0x100 	0000000100000000
 -- colors.cyan 	512 	0x200 	0000001000000000
 -- colors.purple 	1024 	0x400 	0000010000000000
--- colors.blue 	2048 	0x800 	0000100000000000
+	-- colors.blue 	2048 	0x800 	0000100000000000
 	-- colors.brown 	4096 	0x1000 	0001000000000000
 -- colors.green 	8192 	0x2000 	0010000000000000
--- colors.red 	16384 	0x4000 	0100000000000000
+	-- colors.red 	16384 	0x4000 	0100000000000000
 -- colors.black 	32768 	0x8000 	1000000000000000 
 
 client_id = 6484
@@ -221,7 +221,11 @@ local last_msg
 local charge_time = 0
 local InCounter = 0
 local AddCounter = 0
+local UnprocessedCounter = 0
 local OutCounter = 0
+local InCounter_id = 6577
+local AddCounter_id = 6576
+local OutCounter_id = 6575
 
 --os.pullEvent = os.pullEventRaw;
 rednet.open("left")
@@ -362,34 +366,37 @@ if sel == 1 then
 op_timer = 15
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
 else
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nДобавлено:\n0\nОбработано:\n0"})
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nПринято к обработке:\n0\nОтброшено:\n0\nОбработано:\n0"})
 end
 
 while not is_stop do
 
-local sEvent, param1 = os.pullEvent()
+local sEvent, param, data = os.pullEvent()
 
-if sEvent == "redstone" then
+if sEvent == "rednet_message" then
 
-    if rs.testBundledInput("back", colors.red) then
-    InCounter = InCounter + 1;
-	finish_counter = 0;
-    end
-	
-    if rs.testBundledInput("back", colors.lightGray) then
-    AddCounter = AddCounter + 1;
-	finish_counter = 0;
-    end	
+print("Receive message: "..data.."\n")
+msg = textutils.unserialize(data)
 
-    if rs.testBundledInput("back", colors.blue) then
-    OutCounter = OutCounter + 1;
-	finish_counter = 0;
-    end	
+if param == InCounter_id then
+InCounter = InCounter + msg.count
+finish_counter = 0
+end
 
+if param == AddCounter_id then
+AddCounter = AddCounter + msg.count
+UnprocessedCounter = UnprocessedCounter + msg.unprocessed_count
+finish_counter = 0
+end
+
+if param == OutCounter_id then
+OutCounter = OutCounter + msg.count
+finish_counter = 0
+end
 
 end
 
-if sEvent == "timer" and param1 == timer then
+if sEvent == "timer" and param == timer then
 
 glog[#glog]["InCounter"] = InCounter
 glog[#glog]["AddCounter"] = AddCounter
@@ -409,7 +416,8 @@ SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, 
 else
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = AddCounter})
-SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = OutCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = UnprocessedCounter})
+SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 8, text = OutCounter})
 end
 
 end
