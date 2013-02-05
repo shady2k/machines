@@ -226,6 +226,7 @@ local OutCounter = 0
 local InCounter_id = 6577
 local AddCounter_id = 6576
 local OutCounter_id = 6575
+local is_all_detectors = false
 
 --os.pullEvent = os.pullEventRaw;
 rednet.open("left")
@@ -233,7 +234,7 @@ rednet.open("left")
 if fs.exists("machines_start") then --В прошлый раз не закончили
 redstone.setBundledOutput("back", 0)
 
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "В процессе работы возникла критическая ошибка. Пожалуйста, обратитесь к администрации магазина.\n\nПриносим извенения за причененные неудобства."})
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "В процессе работы возникла критическая ошибка. Пожалуйста, обратитесь к администрации магазина.\n\nПриносим извинения за причененные неудобства."})
 
 while 1 do
 WaitForMessages()
@@ -258,6 +259,46 @@ WaitForMessages()
 end
 
 redstone.setBundledOutput("back", colors.cyan)
+
+--проверка датчиков
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите. Выполняется проверка готовности системы к работе."})
+local timer = os.startTimer(5)
+
+while not is_all_detectors do --while
+
+local event, param = os.pullEvent()
+
+if event == "timer" and param == timer then --timer_event
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Один из компонентов системы не отвечает, сервис временно недоступен. Попробуйте, пожалуйста, позже.\n\nПриносим извинения за неудобства."})
+sleep(5)
+os.reboot()
+end --timer_event
+
+if event == "rednet_message" then --rednet_message
+
+if param == InCounter_id then
+InCounter = InCounter + 1
+end
+
+if param == AddCounter_id then
+AddCounter = AddCounter + 1
+end
+
+if param == OutCounter_id then
+OutCounter = OutCounter + 1
+end
+
+end
+
+if InCounter > 0 and AddCounter > 0 and OutCounter > 0 then
+is_all_detectors = true
+end
+end
+
+InCounter = 0
+AddCounter = 0
+OutCounter = 0
+--end проверка датчиков
 
 sel = SendAndWaitForMessage({action = "VertMenu", menu_table = {"1. Зарядка", "2. Дробилка + печь", "Выход"}, menu_path = "Главное меню"}, 30)
 
