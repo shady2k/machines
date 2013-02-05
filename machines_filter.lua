@@ -48,14 +48,15 @@ while 1 do --while
 
 local event, param, data = os.pullEvent()
 
+if event == "key" and param == 199 then return end
+
 if event == "rednet_message" and param == server_id then --rednet_message
 print("Receive message: "..data.."\n")
 
 msg = textutils.unserialize(data)
 
 if msg.action == "ping" then
-print("Send message: pong\n")
-rednet.send(server_id, {action = "ans", user_text = "pong"})
+SendMessage({action = "ans", user_text = "pong"})
 end
 
 end --rednet_message
@@ -64,33 +65,25 @@ end --while
 
 end
 
-function main()
+function main(slots)
 
 local i = 0
 local i2 = 0
-local ping_count = 0
 local is_drop = false
 local items_count = 0
-local slots = {}
 
 while 1 do
-
-ping_count = ping_count + 1
-
-if ping_count > 500 then
-SendMessage({ count = 0, unprocessed_count = 0})
-ping_count = 0
-end
 
 for i = 1, 16, 1 do
 	turtle.select(i)
 	items_count = turtle.getItemCount(i)
 	
+	if items_count > 0 then
 	if slots["i"..tostring(i)] then --было в фильтре
-	
+		
 		if items_count > 1 then
 			turtle.dropDown(items_count - 1)
-			SendMessage({action = "count", count = items_count, unprocessed_count = 0})
+			SendMessage({action = "count", count = (items_count - 1), unprocessed_count = 0})
 		end
 	
 	else --не было в фильтре
@@ -111,6 +104,7 @@ for i = 1, 16, 1 do
 		turtle.dropUp(items_count)
 		SendMessage({action = "count", count = 0, unprocessed_count = items_count})
 		end
+	end
 	end
 end
 end
@@ -137,6 +131,4 @@ slots = init()
 end
 --init end
 
-while 1 do
-parallel.waitForAll(function() main() end, function() WaitForMessages() end)
-end
+parallel.waitForAny(function() main(slots) end, function() WaitForMessages() end)
