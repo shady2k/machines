@@ -14,14 +14,15 @@ while 1 do --while
 
 local event, param, data = os.pullEvent()
 
+if event == "key" and param == 199 then return end
+
 if event == "rednet_message" and param == server_id then --rednet_message
 print("Receive message: "..data.."\n")
 
 msg = textutils.unserialize(data)
 
 if msg.action == "ping" then
-print("Send message: pong\n")
-rednet.send(server_id, {action = "ans", user_text = "pong"})
+SendMessage({action = "ans", user_text = "pong"})
 end
 
 end --rednet_message
@@ -66,6 +67,4 @@ end
 server_id = 6478
 rednet.open("right")
 
-while 1 do
-parallel.waitForAll(function() main() end, function() WaitForMessages() end)
-end
+parallel.waitForAny(function() main() end, function() WaitForMessages() end)
