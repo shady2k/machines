@@ -224,7 +224,7 @@ local AddCounter = 0
 local UnprocessedCounter = 0
 local OutCounter = 0
 local InCounter_id = 6577
-local AddCounter_id = 6576
+local AddCounter_id = 6587
 local OutCounter_id = 6575
 local is_all_detectors = false
 
@@ -262,15 +262,17 @@ redstone.setBundledOutput("back", colors.cyan)
 
 --проверка датчиков
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите. Выполняется проверка готовности системы к работе."})
-local timer = os.startTimer(5)
+rednet.broadcast(textutils.serialize({action = "ping"}))
+local timer = os.startTimer(2)
 
 while not is_all_detectors do --while
 
 local event, param = os.pullEvent()
 
 if event == "timer" and param == timer then --timer_event
+redstone.setBundledOutput("back", colors.purple)
 SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Один из компонентов системы не отвечает, сервис временно недоступен. Попробуйте, пожалуйста, позже.\n\nПриносим извинения за неудобства."})
-sleep(5)
+sleep(10)
 os.reboot()
 end --timer_event
 
@@ -303,6 +305,15 @@ OutCounter = 0
 sel = SendAndWaitForMessage({action = "VertMenu", menu_table = {"1. Зарядка", "2. Дробилка + печь", "Выход"}, menu_path = "Главное меню"}, 30)
 
 if sel == -1 or sel == 3 then
+
+if rs.testBundledInput("back", colors.black) then
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, покиньте вагонетку."})
+end
+
+while rs.testBundledInput("back", colors.black) do
+WaitForMessages()
+end  
+
 os.reboot()
 end
 
