@@ -15,6 +15,12 @@ file.write(textutils.serialize(table))
 file.close()
 end
 
+function SendMessage(msg)
+msg = textutils.serialize(msg)
+rednet.send(server_id, msg);
+print("Send message: "..msg.."\n")
+end
+
 function init()
 local slots = {}
 local i = 0
@@ -38,6 +44,7 @@ end
 
 --program begin
 
+server_id = 6478
 local i = 0
 local i2 = 0
 local is_drop = false
@@ -63,6 +70,7 @@ for i = 1, 16, 1 do
 	
 		if items_count > 1 then
 			turtle.dropDown(items_count - 1)
+			SendMessage({ count = items_count, unprocessed_count = 0})
 		end
 	
 	else --не было в фильтре
@@ -73,12 +81,16 @@ for i = 1, 16, 1 do
 		if slots["i"..tostring(i2)] and i2 ~= i then --было в фильтре
 			if turtle.compareTo(i2) then
 				turtle.dropDown(items_count)
+				SendMessage({ count = items_count, unprocessed_count = 0})
 				is_drop = true
 			end
 		end
 		end
 
-		if not is_drop then turtle.dropUp(items_count) end
+		if not is_drop then --не было в фильтре
+		turtle.dropUp(items_count)
+		SendMessage({ count = 0, unprocessed_count = items_count})
+		end
 	end
 end
 end
