@@ -580,6 +580,8 @@ glog[#glog]["is_done"] = 1
 if glog ~= nil then save(glog, "machines_log") end
 fs.delete("machines_start")
 
+redstone.setBundledOutput("back", colors.purple)
+
 sleep(1);
 
 os.reboot();
