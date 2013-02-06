@@ -413,13 +413,10 @@ local timer = os.startTimer(1);
 local is_show = false;
 local op_timer = 0
 local is_eject = false
+local is_first_item = true
+local is_last_item = false
 
-if sel == 1 then 
-op_timer = 15
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
-else
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nПринято к обработке:\n0\nОтброшено:\n0\nОбработано:\n0"})
-end
+if sel == 1 then op_timer = 15 end
 
 while not is_stop do
 
@@ -458,9 +455,19 @@ glog[#glog]["OutCounter"] = OutCounter
 if is_eject then
 is_eject = false
 rs.setBundledOutput("back", colors.green)
+
+if is_first_item then
+is_first_item = false
+if sel == 1 then 
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
+else
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nПринято к обработке:\n0\nОтброшено:\n0\nОбработано:\n0"})
+end
 end
 
-if (InCounter + AddCounter) > OutCounter then
+end
+
+if (InCounter + AddCounter) > OutCounter and not is_first_item and not is_last_item then
 
 if sel == 1 then
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
@@ -490,6 +497,12 @@ if op_timer <= 0 then
 if sel == 1 then 
 op_timer = charge_time
 if not is_eject then
+
+if (InCounter + AddCounter) <= (OutCounter + 1) then
+is_last_item = true
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите. Ожидание завершения работы."})
+end
+
 is_eject = true
 rs.setBundledOutput("back", colors.combine(colors.green, colors.lime))
 end
