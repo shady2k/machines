@@ -413,13 +413,10 @@ local timer = os.startTimer(1);
 local is_show = false;
 local op_timer = 0
 local is_eject = false
+local is_first_item = true
+local is_last_item = false
 
-if sel == 1 then 
-op_timer = 15
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
-else
-SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nПринято к обработке:\n0\nОтброшено:\n0\nОбработано:\n0"})
-end
+if sel == 1 then op_timer = 15 end
 
 while not is_stop do
 
@@ -456,17 +453,31 @@ glog[#glog]["UnprocessedCounter"] = UnprocessedCounter
 glog[#glog]["OutCounter"] = OutCounter
 
 if is_eject then
+
+if (InCounter + AddCounter) <= (OutCounter + 1) and sel == 1 and not is_first_item then
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Пожалуйста, подождите. Окончание обработки."})
+is_last_item = true
+end
+
 is_eject = false
+is_first_item = false
+
 rs.setBundledOutput("back", colors.green)
 end
 
 if (InCounter + AddCounter) > OutCounter then
 
 if sel == 1 then
+
+if not is_first_item and not is_last_item then
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nОбработано:\n0\nЗарядка (секунд):\n"..tostring(charge_time)})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = OutCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = tostring(op_timer)})
+end
+
 else
+SendMessage({action = "print", term_clear = true, set_cursor = true, posx = 1, posy = 1, text = "Поступило на обработку:\n0\nПринято к обработке:\n0\nОтброшено:\n0\nОбработано:\n0"})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 2, text = InCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 4, text = AddCounter})
 SendMessage({action = "print", term_clear = false, set_cursor = true, posx = 1, posy = 6, text = UnprocessedCounter})
